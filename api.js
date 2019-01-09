@@ -1,48 +1,46 @@
 const { Router } = require('express');
 
+const Todo = require('./Todo')
+
 const routes = Router();
 
-const todos = [{ todo: 'do Homeworks', id: 1 },{todo: 'clean room', id:2}]
-
-routes.get('/todos', (req, res) => {
-    res.json(todos);
+routes.get('/todos', function(req, res) {
+    Todo.find({}, function(err, todo) {
+       res.json(todo);
+    });
 });
 
 routes.delete('/todos/:id' ,(req,res) =>{
     const {id} = req.params;
-    let index = -1;
-    for (let i = 0;i < todos.length;i++){
-    if (todos[i].id == id){
-        index = i;
-        break;
-    }
-}
-if (index >= 0) {
-    todos.splice(index, 1);}
+    Todo.remove({_id : id}, function(err){
+        if (err) return res.status(400).end();
+        return res.status(200);
+    })
    
     res.end()
 }
 
 );
 routes.post('/todos', (req,res) =>{
-    let todoitem = { todo: req.body.todo ,id: todos.length + 1}
+    let todoitem = { todo: req.body.todo }
     if (req.body.todo != ''){
-        todos.push(todoitem);
-        return res.status(201).json(todoitem);
-    };
-    
+        return Todo.create(todoitem, function(err,todo){
+            if (err) return res.status(400).end();
+            return res.status(201).json(todo);
+        })    
+    }  
     return res.status(400).end()
 }); 
 
 routes.put('/todos/:id',(req,res) => {
     const { id } = req.params;
-    const todo = todos.find(todo => todo.id === +id);
-    if (todo) {
-        todo.todo = req.body.todo;
-        return res.status(200).end()
-    }
+   return Todo.findByIdAndUpdate(id, {$set:{todo:req.body.todo}}, {new:true}, function(err,todo){
+        if (err) return res.status(400).end();
+        return res.status(201).json(todo);
+        
+    })
     return res.status(400).end()
-   
+
 }
 )
 

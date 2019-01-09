@@ -84,7 +84,8 @@ function editTodo(id){
     
 
 
-function renderTodo({todo, id}) {
+function renderTodo({todo, _id}) {
+    const id = _id;
     let p = document.createElement('P');
     p.id = `todoitem${id}`
     let node = document.createTextNode(`${todo}`);
